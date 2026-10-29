@@ -1,10 +1,10 @@
-> **Engineering candidate v1.0.0-rc.2 — not production-certified.** Active checks transmit TCP traffic and require separately authorized execution. See [Security Hardening](docs/SECURITY_HARDENING.md) and [Safety](docs/SAFETY.md).
+﻿> **Engineering candidate v1.0.0-rc.2 â€” not production-certified.** Active checks transmit TCP traffic and require separately authorized execution. See [Security Hardening](docs/SECURITY_HARDENING.md) and [Safety](docs/SAFETY.md).
 
-# Zero-Trace OT Guard — v1.0 Enterprise (Engineering Candidate)
+# Zero-Trace OT Guard â€” v1.0 Enterprise (Engineering Candidate)
 
 **Passive-first OT evidence analyzer with optional, separately authorized TCP connectivity checks.**
 
-> **Not certified or independently validated for production OT use.** The “Enterprise” label identifies the intended project edition, not an independent assurance level. Test in an isolated lab and complete site-specific safety review before deployment.
+> **Not certified or independently validated for production OT use.** The â€œEnterpriseâ€ label identifies the intended project edition, not an independent assurance level. Test in an isolated lab and complete site-specific safety review before deployment.
 
 ## Features
 - Offline classic Ethernet/IPv4 PCAP metadata extraction (TCP/UDP), or CSV flow import.
@@ -22,13 +22,12 @@ python -m venv .venv
 Start-Process .\reports\report.html
 .\.venv\Scripts\python.exe -m pytest -q
 ```
-
 ## PCAP import
 Put a classic PCAP file named `capture.pcap` in a folder, then run `otguard analyze --input <folder> --output reports`. CSV `flows.csv` takes precedence. PCAPNG, IPv6, fragments, nested VLANs, non-Ethernet captures, and protocol payload decoding are **not supported**. The parser retains metadata only; PCAP flow bytes are reported as zero because byte accounting is not implemented. Packet processing is capped by `--max-packets` (default 500,000).
 
 ## Active connectivity workflow
 1. Obtain a signed change ticket and documented written authorization from the asset owner; complete an OT hazard assessment.
-2. Create a local approval JSON based on `examples/approval.example.json`, with exact IPs, ports, expiry, budget and delay. **The JSON is an operator-supplied control, not a cryptographically authenticated authorization system.**
+2. Create a local approval JSON based on `examples/approval.example.json`, with exact IPs, ports, expiry, budget and delay. **Active checks require an HMAC-signed approval file and a separately provisioned OTGUARD_APPROVAL_KEY. See docs/SECURITY_HARDENING.md for signing instructions.**
 3. Review the dry run:
 ```powershell
 otguard active-check --approval approval.json --target 192.0.2.10 --port 443 --ack-authorized
@@ -46,3 +45,4 @@ This is a functioning reference implementation, **not** a comprehensive industri
 ## v1.0.0-rc.2 safety controls
 
 Active connectivity checks require explicit authorization and an HMAC-verified approval file. The scanner also provides scope restrictions, cooperative emergency-stop functionality, and structured audit logging. These controls are intended to reduce operational risk but do not establish production OT safety certification. Refer to `docs/SECURITY_HARDENING.md` for configuration requirements and limitations.
+
