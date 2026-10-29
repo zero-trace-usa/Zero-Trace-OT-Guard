@@ -1,0 +1,4 @@
+ip,vendor,product,version,zone
+10.10.1.5,ExampleCo,Engineering Workstation,1.0,IT
+10.10.2.20,ExampleCo,PLC,1.0,Control
+10.10.3.10,ExampleCo,HMI,2.0,Operations

@@ -1,0 +1,9 @@
+{
+  "operator": "REPLACE_WITH_OPERATOR",
+  "ticket": "REPLACE_WITH_APPROVAL_ID",
+  "expires_utc": "2027-01-01T00:00:00Z",
+  "allowed_hosts": ["192.0.2.10"],
+  "allowed_ports": [443],
+  "max_connections": 1,
+  "min_delay_seconds": 2.0
+}

@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+*.egg-info/
+dist/
+build/
+reports/
+active-results.json
+approval.json
+*.pcap
+*.pcapng

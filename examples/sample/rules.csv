@@ -1,0 +1,2 @@
+src_zone,dst_zone,dst_port,action
+IT,Control,502,deny
