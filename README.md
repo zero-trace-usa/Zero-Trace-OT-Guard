@@ -16,7 +16,7 @@
 
 ## Windows Quick Start (Python 3.10+)
 ```powershell
-py -3 -m venv .venv
+python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -e .
 .\.venv\Scripts\python.exe -m otguard analyze --input examples/sample --output reports
 start reports\report.html
