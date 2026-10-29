@@ -17,10 +17,9 @@
 ## Windows Quick Start (Python 3.10+)
 ```powershell
 python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -e .
+.\.venv\Scripts\python.exe -m pip install -e ".[dev]"
 .\.venv\Scripts\python.exe -m otguard analyze --input examples/sample --output reports
-start reports\report.html
-.\.venv\Scripts\python.exe -m pip install -e '.[dev]'
+Start-Process .\reports\report.html
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
@@ -46,4 +45,4 @@ This is a functioning reference implementation, **not** a comprehensive industri
 
 ## v1.0.0-rc.2 safety controls
 
-Active checks now require an HMAC-signed approval file and a separately provisioned `OTGUARD_APPROVAL_KEY` (at least 32 characters). See `docs/SECURITY_HARDENING.md` for signing, operator workflow, stop-file use, and limitations. A dry run remains the default. The tool is not validated for production industrial networks.
+Active connectivity checks require explicit authorization and an HMAC-verified approval file. The scanner also provides scope restrictions, cooperative emergency-stop functionality, and structured audit logging. These controls are intended to reduce operational risk but do not establish production OT safety certification. Refer to `docs/SECURITY_HARDENING.md` for configuration requirements and limitations.
