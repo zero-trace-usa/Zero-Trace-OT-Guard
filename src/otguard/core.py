@@ -1,5 +1,6 @@
 """Offline evidence analysis. No network operations in this module."""
 import csv
+import os
 import ipaddress
 import json
 import struct
@@ -10,13 +11,29 @@ from html import escape
 PORTS = {502:'Modbus/TCP',44818:'EtherNet/IP',2222:'EtherNet/IP I/O',20000:'DNP3',102:'S7comm/ISO-on-TCP',4840:'OPC UA',47808:'BACnet/IP',2404:'IEC 60870-5-104',1883:'MQTT',8883:'MQTT/TLS',161:'SNMP',80:'HTTP',443:'HTTPS',22:'SSH',3389:'RDP',445:'SMB'}
 FIELDS = ('src_ip','dst_ip','protocol','src_port','dst_port','packets','bytes')
 
+MAX_CSV_BYTES = 20 * 1024 * 1024
+MAX_CSV_ROWS = 100000
+MAX_PCAP_BYTES = 256 * 1024 * 1024
+
 def rows_csv(path):
-    with open(path,encoding='utf-8-sig',newline='') as f:
-        return list(csv.DictReader(f))
+    if Path(path).stat().st_size > MAX_CSV_BYTES:
+        raise ValueError('CSV file exceeds 20 MiB safety limit')
+    with open(path, encoding='utf-8-sig', newline='') as f:
+        reader = csv.DictReader(f)
+        result=[]
+        for row in reader:
+            if len(result) >= MAX_CSV_ROWS:
+                raise ValueError('CSV row limit exceeded')
+            result.append(row)
+        return result
 
 def parse_pcap(path, max_packets=500000):
     """Classic PCAP Ethernet/IPv4 TCP+UDP metadata only. No payload retention."""
-    flows=Counter(); warnings=[]; count=0
+    if Path(path).stat().st_size > MAX_PCAP_BYTES:
+        raise ValueError('PCAP exceeds 256 MiB safety limit')
+    if not 1 <= max_packets <= 1000000:
+        raise ValueError('max_packets must be between 1 and 1000000')
+    flows=Counter(); warnings=[]; count=0; skipped=0
     with open(path,'rb') as f:
         hdr=f.read(24)
         if len(hdr)!=24: raise ValueError('Truncated PCAP header')
@@ -35,22 +52,30 @@ def parse_pcap(path, max_packets=500000):
             b=f.read(incl)
             if len(b)!=incl: warnings.append('Truncated packet data'); break
             count+=1
-            if len(b)<14: continue
+            if len(b)<14:
+                skipped+=1; continue
             off=14; eth=struct.unpack('!H',b[12:14])[0]
-            if eth in (0x8100,0x88a8) and len(b)>=18:
-                eth=struct.unpack('!H',b[16:18])[0]; off=18
+            while eth in (0x8100,0x88a8,0x9100) and len(b)>=off+4:
+                eth=struct.unpack('!H',b[off+2:off+4])[0]; off+=4
             if eth!=0x0800 or len(b)<off+20: continue
             ip=b[off:]; version=ip[0]>>4; ihl=(ip[0]&15)*4
-            if version!=4 or ihl<20 or len(ip)<ihl: continue
-            if struct.unpack('!H',ip[6:8])[0]&0x1fff: continue
+            if version!=4 or ihl<20 or len(ip)<ihl:
+                skipped+=1; continue
+            total_length=struct.unpack('!H',ip[2:4])[0]
+            if total_length<ihl or total_length>len(ip):
+                skipped+=1; continue
+            ip=ip[:total_length]
+            if struct.unpack('!H',ip[6:8])[0]&0x3fff: continue
             proto=ip[9]
-            if proto not in (6,17) or len(ip)<ihl+4: continue
+            minimum=20 if proto==6 else 8
+            if proto not in (6,17) or len(ip)<ihl+minimum:
+                skipped+=1; continue
             sport,dport=struct.unpack('!HH',ip[ihl:ihl+4])
             src=str(ipaddress.IPv4Address(ip[12:16])); dst=str(ipaddress.IPv4Address(ip[16:20]))
             flows[(src,dst,'TCP' if proto==6 else 'UDP',sport,dport)]+=1
         if count>=max_packets: warnings.append('Packet limit reached; capture may be incomplete')
     result=[dict(zip(FIELDS[:5],k),packets=n,bytes=0) for k,n in sorted(flows.items())]
-    return result,{'packets_processed':count,'warnings':warnings,'capture_note':'bytes not aggregated for PCAP; metadata-only parsing'}
+    return result,{'packets_processed':count,'packets_skipped_or_malformed':skipped,'warnings':warnings,'capture_note':'bytes not aggregated for PCAP; metadata-only parsing'}
 
 def normalize_flow(row):
     a={k:str(row.get(k,'')).strip() for k in FIELDS}
@@ -58,8 +83,11 @@ def normalize_flow(row):
     a['protocol']=a['protocol'].upper()
     if a['protocol'] not in ('TCP','UDP'): raise ValueError('Only TCP/UDP flow rows supported')
     for key in ('src_port','dst_port'):
-        a[key]=int(a[key]); assert 0<=a[key]<=65535
-    for key in ('packets','bytes'): a[key]=int(a[key] or 0); assert a[key]>=0
+        a[key]=int(a[key]); 
+        if not 0<=a[key]<=65535: raise ValueError('Port out of range')
+    for key in ('packets','bytes'):
+        a[key]=int(a[key] or 0)
+        if a[key]<0: raise ValueError('Negative flow metric')
     a['service']=PORTS.get(a['dst_port'],'Unknown')
     return a
 
@@ -87,13 +115,19 @@ def assess(flows, assets=None, advisories=None, rules=None):
                     findings.append({'type':'Potential advisory match','severity':'Review','asset':a['ip'],'evidence':v.get('advisory_id','Unspecified')+' (inventory-based; not confirmed vulnerable)','recommendation':'Verify firmware, affected versions, vendor mitigations and compensating controls.'})
     return {'summary':{'observed_assets':len(inventory),'flows':len(normalized),'findings':len(findings)},'assets':sorted(inventory.values(),key=lambda a:a['ip']),'flows':normalized,'findings':findings,'limitations':['Passive observation does not prove absence of devices, services or vulnerabilities.','Port-based protocol identification is indicative, not a protocol decoder.','No active OT protocol requests or exploitation performed.']}
 
+def csv_safe(value):
+    text=str(value) if value is not None else ''
+    if text.lstrip().startswith(('=', '+', '-', '@', '\t', '\r', '\n')):
+        return "'"+text
+    return text
+
 def write_report(result,out):
     out=Path(out); out.mkdir(parents=True,exist_ok=True)
     (out/'report.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
     for name,items in [('assets',result['assets']),('flows',result['flows']),('findings',result['findings'])]:
         with (out/(name+'.csv')).open('w',newline='',encoding='utf-8') as f:
             keys=list(dict.fromkeys(k for item in items for k in item))
-            w=csv.DictWriter(f,fieldnames=keys); w.writeheader(); w.writerows(items)
+            w=csv.DictWriter(f,fieldnames=keys); w.writeheader(); w.writerows([{k:csv_safe(v) for k,v in item.items()} for item in items])
     def table(items):
         if not items:return '<p>No entries.</p>'
         keys=list(dict.fromkeys(k for x in items for k in x))

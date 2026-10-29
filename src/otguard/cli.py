@@ -2,7 +2,7 @@ import argparse
 import json
 from pathlib import Path
 from .core import rows_csv,parse_pcap,assess,write_report
-from .active import connect_checks
+from .active import connect_checks, sign_approval
 
 def main(argv=None):
     p=argparse.ArgumentParser(prog='otguard',description='Zero-Trace OT Guard — passive by default')
@@ -16,9 +16,16 @@ def main(argv=None):
     b.add_argument('--port',type=int,action='append',required=True)
     b.add_argument('--ack-authorized',action='store_true');b.add_argument('--execute',action='store_true')
     b.add_argument('--output',default='active-results.json')
+    b.add_argument('--stop-file',help='Stop checks when this file exists; remove stale file before execution')
+    b.add_argument('--audit-file',default='active-audit.jsonl')
+    c=sub.add_parser('sign-approval',help='Sign an approval file using OTGUARD_APPROVAL_KEY; run only by authorized approver')
+    c.add_argument('--approval',required=True)
     args=p.parse_args(argv)
     try:
-        if args.command=='analyze':
+        if args.command=='sign-approval':
+            sign_approval(args.approval)
+            print('Approval signed')
+        elif args.command=='analyze':
             folder=Path(args.input)
             if (folder/'flows.csv').exists():flows=rows_csv(folder/'flows.csv');meta={'source':'CSV'}
             elif (folder/'capture.pcap').exists():flows,meta=parse_pcap(folder/'capture.pcap',args.max_packets)
@@ -29,7 +36,7 @@ def main(argv=None):
             write_report(result,args.output)
             print(json.dumps({'output':args.output,'summary':result['summary']},indent=2))
         else:
-            result=connect_checks(args.approval,args.target,args.port,args.ack_authorized,args.execute)
+            result=connect_checks(args.approval,args.target,args.port,args.ack_authorized,args.execute,args.stop_file,args.audit_file)
             Path(args.output).write_text(json.dumps(result,indent=2),encoding='utf-8')
             print(json.dumps(result,indent=2))
         return 0

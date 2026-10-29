@@ -29,6 +29,10 @@ def test_pcap(tmp_path):
 def approval(tmp_path):
     p=tmp_path/'approval.json'
     p.write_text(json.dumps(dict(operator='tester',ticket='OT-123',expires_utc='2099-01-01T00:00:00Z',allowed_hosts=['192.0.2.10'],allowed_ports=[443,502],max_connections=2,min_delay_seconds=1)))
+    from otguard.active import sign_approval
+    import os
+    os.environ['OTGUARD_APPROVAL_KEY']='a'*40
+    sign_approval(p)
     return p
 
 def test_approval_required(tmp_path):
@@ -44,3 +48,33 @@ def test_dry_run_never_connects(tmp_path,monkeypatch):
     import socket
     monkeypatch.setattr(socket,'create_connection',lambda *a,**k: (_ for _ in ()).throw(AssertionError('Network attempted')))
     assert connect_checks(approval(tmp_path),['192.0.2.10'],[443],True,False)['mode']=='dry-run'
+
+def test_csv_formula_neutralization(tmp_path):
+    from otguard.core import csv_safe
+    assert csv_safe('=1+1').startswith("'")
+    assert csv_safe('normal') == 'normal'
+
+def test_csv_size_limit(tmp_path):
+    from otguard.core import rows_csv, MAX_CSV_BYTES
+    p=tmp_path/'large.csv'
+    with p.open('wb') as f: f.truncate(MAX_CSV_BYTES+1)
+    with pytest.raises(ValueError,match='limit'): rows_csv(p)
+
+def test_bad_signature_rejected(tmp_path,monkeypatch):
+    monkeypatch.setenv('OTGUARD_APPROVAL_KEY','a'*40)
+    p=tmp_path/'approval.json'
+    p.write_text(json.dumps({'operator':'x','ticket':'x','signature':'0'*64}))
+    with pytest.raises(PermissionError,match='signature'):
+        validate_approval(p,['192.0.2.10'],[443],True)
+
+def test_stop_file_prevents_network(tmp_path,monkeypatch):
+    import socket
+    from otguard.active import sign_approval
+    monkeypatch.setenv('OTGUARD_APPROVAL_KEY','a'*40)
+    p=approval(tmp_path)
+    sign_approval(p)
+    stop=tmp_path/'STOP'
+    stop.touch()
+    monkeypatch.setattr(socket,'create_connection',lambda *a,**k: (_ for _ in ()).throw(AssertionError('network attempted')))
+    result=connect_checks(p,['192.0.2.10'],[443],True,True,stop_file=stop,audit_file=tmp_path/'audit.jsonl')
+    assert result['mode']=='interrupted' and not result['checks']

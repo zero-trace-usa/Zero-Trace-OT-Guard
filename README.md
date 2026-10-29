@@ -1,3 +1,5 @@
+> **Engineering candidate v1.0.0-rc.2 — not production-certified.** Active checks transmit TCP traffic and require separately authorized execution. See [Security Hardening](docs/SECURITY_HARDENING.md) and [Safety](docs/SAFETY.md).
+
 # Zero-Trace OT Guard — v1.0 Enterprise (Engineering Candidate)
 
 **Passive-first OT evidence analyzer with optional, separately authorized TCP connectivity checks.**
@@ -41,3 +43,7 @@ Create `zero-trace-usa/Zero-Trace-OT-Guard` without initial files; extract this 
 
 ## Important limitations
 This is a functioning reference implementation, **not** a comprehensive industrial protocol decoder, full vulnerability scanner, certified product, or production-ready deployment. See `docs/SAFETY.md`, `docs/ARCHITECTURE.md`, and `docs/VALIDATION.md`.
+
+## v1.0.0-rc.2 safety controls
+
+Active checks now require an HMAC-signed approval file and a separately provisioned `OTGUARD_APPROVAL_KEY` (at least 32 characters). See `docs/SECURITY_HARDENING.md` for signing, operator workflow, stop-file use, and limitations. A dry run remains the default. The tool is not validated for production industrial networks.
