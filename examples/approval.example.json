@@ -1,7 +1,7 @@
 {
   "operator": "REPLACE_WITH_OPERATOR",
   "ticket": "REPLACE_WITH_APPROVAL_ID",
-  "expires_utc": "2027-01-01T00:00:00Z",
+  "expires_utc": "REPLACE_WITH_TIMEZONE_AWARE_EXPIRY",
   "allowed_hosts": [
     "192.0.2.10"
   ],

@@ -1,62 +1,98 @@
-> **Engineering candidate v1.0.0-rc.3 — not production-certified.** Active checks transmit TCP traffic and require separately authorized execution. See [Security Hardening](docs/SECURITY_HARDENING.md) and [Safety](docs/SAFETY.md).
+# Zero-Trace OT Guard
 
-# Zero-Trace OT Guard — v1.0 Enterprise (Engineering Candidate)
+Passive-first OT network evidence analysis with separately authorized TCP connectivity checks.
 
-**Passive-first OT evidence analyzer with optional, separately authorized TCP connectivity checks.**
+**Current release: [v1.0.0-rc.4](https://github.com/zero-trace-usa/Zero-Trace-OT-Guard/releases/tag/v1.0.0-rc.4), an engineering prerelease.** Suitable for offline analysis and controlled lab evaluation. Production OT safety certification and vendor compatibility validation have not been completed.
 
-> **Not certified or independently validated for production OT use.** The “Enterprise” label identifies the intended project edition, not an independent assurance level. Test in an isolated lab and complete site-specific safety review before deployment.
+## Install and run
 
-## Features
-- Offline classic Ethernet/IPv4 PCAP metadata extraction (TCP/UDP), or CSV flow import.
-- Asset inventory merging, indicative port-based industrial service labels, zone/conduit policy conflict review.
-- Offline advisory-to-inventory matching (**potential matches, never confirmed vulnerabilities**).
-- HTML, JSON, and CSV outputs with HTML escaping.
-- Active mode is **off by default**. The separate command requires a scoped, expiring approval JSON, an explicit acknowledgement, and `--execute` to connect.
-- Active checks perform **TCP connect only**, no protocol commands, no credential testing, no exploitation, and refuse industrial protocol ports.
+Requires Git and Python 3.10 or newer. CI covers Python 3.10–3.13 on Linux. Windows and macOS commands are provided, but those operating systems have not been validated in CI. No runtime dependencies, API keys, background services or device access are required for offline analysis. Internet access is needed to clone and fetch Python build tools during installation.
 
-## Quick start (Python 3.10+)
+### Linux and macOS
 
-Linux/macOS:
 ```sh
+git clone --branch v1.0.0-rc.4 --depth 1 https://github.com/zero-trace-usa/Zero-Trace-OT-Guard.git
+cd Zero-Trace-OT-Guard
 python3 -m venv .venv
-.venv/bin/python -m pip install -e '.[dev]'
-.venv/bin/otguard analyze --input examples/sample --output reports
-.venv/bin/python -m pytest -q
+.venv/bin/python -m pip install .
+.venv/bin/python -m otguard --version
+.venv/bin/python -m otguard analyze --input examples/sample --output reports
 ```
 
-Open `reports/report.html` locally. The sample produces 3 assets, 2 flows and 2 findings. No services, credentials, or device access are needed for offline analysis.
+### Windows PowerShell
 
-### Windows
 ```powershell
+git clone --branch v1.0.0-rc.4 --depth 1 https://github.com/zero-trace-usa/Zero-Trace-OT-Guard.git
+cd Zero-Trace-OT-Guard
 python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -e ".[dev]"
+.\.venv\Scripts\python.exe -m pip install .
+.\.venv\Scripts\python.exe -m otguard --version
 .\.venv\Scripts\python.exe -m otguard analyze --input examples/sample --output reports
 Start-Process .\reports\report.html
-.\.venv\Scripts\python.exe -m pytest -q
 ```
-## PCAP import
-Put a classic PCAP file named `capture.pcap` in a folder, then run `otguard analyze --input <folder> --output reports`. CSV `flows.csv` takes precedence. PCAPNG, IPv6, fragments, nested VLANs, non-Ethernet captures, and protocol payload decoding are **not supported**. The parser retains metadata only; PCAP flow bytes are reported as zero because byte accounting is not implemented. Packet processing is capped by `--max-packets` (default 500,000).
 
-## Active connectivity workflow
-1. Obtain a signed change ticket and documented written authorization from the asset owner; complete an OT hazard assessment.
-2. Create a local approval JSON based on `examples/approval.example.json`, with exact IPs, ports, expiry, budget and delay. **Active checks require an HMAC-signed approval file and a separately provisioned OTGUARD_APPROVAL_KEY. See docs/SECURITY_HARDENING.md for signing instructions.**
-3. Review the dry run:
-```powershell
-otguard active-check --approval approval.json --target 192.0.2.10 --port 443 --ack-authorized
+Expected version: `Zero-Trace OT Guard 1.0.0rc4`. Expected sample summary: **3 observed assets, 2 flows, 2 findings**. Open `reports/report.html` locally. JSON and three CSV reports are saved alongside it. Findings are review indicators, not confirmed vulnerabilities.
+
+If Git is unavailable, download and extract the release's GitHub source ZIP, open a terminal in its extracted root, then follow the commands starting with virtual-environment creation. The source distribution also includes documentation and examples. A wheel-only install provides the CLI; sample data must be obtained from a source archive separately. Release assets include SHA256SUMS for download integrity checks.
+
+### Command names
+
+| Name | Purpose |
+| --- | --- |
+| Zero-Trace OT Guard | Product name |
+| `zero-trace-ot-guard` | Python distribution name; not currently published to PyPI |
+| `otguard` | Installed command and Python module |
+| `v1.0.0-rc.4` / `1.0.0rc4` | GitHub tag / equivalent Python package version |
+
+Do not use `pip install zero-trace-ot-guard` as the installation method: this project is distributed through its GitHub release assets and source repository.
+
+For shorter commands, activate the environment with `source .venv/bin/activate` on Linux/macOS or `.\.venv\Scripts\Activate.ps1` in PowerShell. If PowerShell policy blocks activation, continue using the explicit Python path above; no policy change is needed. After activation, `otguard` and `python -m otguard` are equivalent.
+
+## Analyze your evidence
+
+With the environment activated:
+```sh
+python -m otguard analyze --input examples/sample --output reports
+python -m otguard analyze --help
 ```
-4. Review the returned `plan_id`, exact target/port list, earliest timing offsets, and limits. Only after out-of-band approval and in a controlled environment, run the same command with `--execute --plan-id <reviewed-plan-id> --stop-file STOP --audit-file active-audit.jsonl`. The command writes `active-results.json` locally.
 
-Execution now requires the reviewed plan ID. See [Safety policy and operator runbook](docs/SAFETY_ENGINE.md) for signed limits, migration, stop behavior, audit interpretation, and remaining limitations. Connection budgets do **not** enforce packet rates.
+Replace `examples/sample` with your evidence directory, quoting paths containing spaces. Supply `flows.csv` or a classic Ethernet/IPv4 `capture.pcap`. CSV takes precedence if both exist. Optional files are `assets.csv`, `advisories.csv` and `rules.csv`; use the sample headers as templates. Reports in the output directory are overwritten on rerun, so choose a new directory when preserving evidence.
 
-**Never use active checks on PLCs, safety controllers, or production industrial devices without site-specific authorization and engineering approval.** Even a TCP handshake can affect fragile equipment. No claim of zero impact is made.
+PCAP ingestion retains TCP/UDP metadata, not protocol payloads. PCAPNG, IPv6 packet decoding and fragmented IPv4 packets are unsupported. VLAN tags are traversed to locate IPv4; VLAN identities are not retained or used for policy assessment. PCAP byte totals are zero because byte accounting is not implemented. The default processing cap is 500,000 packets; maximum 1,000,000. Inspect JSON evidence warnings for incomplete captures. See [architecture](docs/ARCHITECTURE.md) and [settings](docs/CONFIGURATION.md).
 
-## Repository publishing
-Run the validation and release checklist in [Safety policy and operator runbook](docs/SAFETY_ENGINE.md) before publishing a release.
+## Optional authorized connectivity checks
 
-## Important limitations
-This is a functioning reference implementation, **not** a comprehensive industrial protocol decoder, full vulnerability scanner, certified product, or production-ready deployment. See `docs/SAFETY.md`, `docs/ARCHITECTURE.md`, and `docs/VALIDATION.md`.
+Offline analysis does not need this workflow. TCP handshakes can affect fragile equipment. Active execution requires written asset-owner authorization, site-specific hazard assessment, a signed approval, an acknowledgement and a reviewed plan identifier. The built-in industrial-port denylist is not comprehensive.
 
-## v1.0.0-rc.3 safety controls
+1. Read the [safety policy and operator runbook](docs/SAFETY_ENGINE.md).
+2. Have the authorized approver copy `examples/approval.example.json`, replace every placeholder including expiry, review scope and budgets, and follow the [signing instructions](docs/SECURITY_HARDENING.md).
+3. With the environment activated, review the offline plan:
+   ```sh
+   python -m otguard active-check --approval approval.json --target 192.0.2.10 --port 443 --ack-authorized
+   ```
+4. Only in the separately approved environment, follow the runbook's execution instructions using the returned `plan_id`.
 
-Active connectivity checks require explicit authorization and an HMAC-verified approval file. The scanner also provides scope restrictions, cooperative emergency-stop functionality, and structured audit logging. These controls are intended to reduce operational risk but do not establish production OT safety certification. Refer to `docs/SECURITY_HARDENING.md` for configuration requirements and limitations.
+Execution is serial and enforces per-invocation connection budgets, global spacing, per-host cooldown, expiry and a failure cutoff. Connection budgets do **not** enforce packet rates or coordinate multiple processes. Audit logs are not tamper-evident. No protocol commands, credential tests, exploitation or vulnerability confirmation are performed.
 
+## Help and troubleshooting
+
+- Run `python -m otguard --help`, `analyze --help`, `active-check --help` or `sign-approval --help` within the virtual environment.
+- `No module named otguard`: use the same virtual-environment Python for installation and execution.
+- Missing `venv` on Debian/Ubuntu: install the OS's Python venv package before creating the environment.
+- `Expected flows.csv or capture.pcap`: check `--input` and the filenames; source examples are not included inside a wheel.
+- Approval, signature or plan mismatch errors: review the [settings reference](docs/CONFIGURATION.md); never bypass signature validation.
+
+See [validation evidence](docs/VALIDATION.md), [security policy](SECURITY.md), [changelog](CHANGELOG.md) and [roadmap](ROADMAP.md).
+
+## Development
+
+Use the existing checkout; create and activate a virtual environment, then:
+```sh
+python -m pip install -e '.[dev]'
+python -m pytest -q
+python -m compileall -q src
+python -m bandit -q -r src -s B101
+python -m build
+```
+
+Release publication is gated on the multi-version CI test matrix and installed-wheel smoke checks. See [contributing](CONTRIBUTING.md) and the [release checklist](docs/SAFETY_ENGINE.md).

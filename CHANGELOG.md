@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.0-rc.4 — Installation and documentation consistency
+- Standardized product, distribution, command and version naming.
+- Added CLI --version and option/default help, plus a complete commands/settings reference.
+- Replaced developer-only quick start with version-pinned user installation instructions.
+- Corrected stale unsigned-approval and CSV-export claims in architecture/safety documentation.
+- Added package README/URLs and included documentation and examples in source distributions.
+- Removed a fixed sample approval deadline; operators must explicitly choose their authorized expiry.
+- Updated release workflow actions to Node 24 versions.
+
 ## 1.0.0-rc.3 — Reviewed safety plans
 - Deterministic offline plans bound to the complete signed approval; execution requires the reviewed plan ID.
 - Signed global connection-attempt rate, per-host cooldown and consecutive-failure budgets; serial execution only.

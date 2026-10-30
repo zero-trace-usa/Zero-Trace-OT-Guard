@@ -204,3 +204,22 @@ def test_cli_review_and_stopped_execution(policy, tmp_path, monkeypatch, capsys)
                         '--audit-file', str(tmp_path/'audit')]) == 3
     result = json.loads(output.read_text())
     assert result['stop_reason'] == 'operator_stop' and result['attempted_count'] == 0
+
+
+def test_cli_version_matches_package(capsys):
+    from otguard import __version__
+    from otguard.cli import main
+    with pytest.raises(SystemExit) as exit_info:
+        main(['--version'])
+    assert exit_info.value.code == 0
+    assert capsys.readouterr().out.strip() == f'Zero-Trace OT Guard {__version__}'
+
+
+def test_cli_help_documents_active_defaults(capsys):
+    from otguard.cli import main
+    with pytest.raises(SystemExit) as exit_info:
+        main(['active-check', '--help'])
+    assert exit_info.value.code == 0
+    help_text = capsys.readouterr().out
+    assert 'active-audit.jsonl' in help_text
+    assert '--plan-id' in help_text and '--execute' in help_text

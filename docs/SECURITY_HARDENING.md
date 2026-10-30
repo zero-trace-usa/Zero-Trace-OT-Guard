@@ -1,4 +1,6 @@
-# v1.0.0-rc.3 security hardening
+# v1.0.0-rc.4 security hardening
+
+Commands assume an activated virtual environment; see the [installation guide](../README.md). Offline analysis needs no signing key.
 
 ## Approval integrity
 Active checks now require an HMAC-SHA256 signature on the JSON approval file, using a separately provisioned `OTGUARD_APPROVAL_KEY` of at least 32 characters. The approver should hold the signing key separately from the operator. **This is shared-secret integrity, not independent identity verification or PKI-based authorization.** A compromised signing key can authorize arbitrary approvals. Do not commit approval secrets or live approval files.

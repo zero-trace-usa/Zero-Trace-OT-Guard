@@ -1,0 +1,3 @@
+include CHANGELOG.md CONTRIBUTING.md SECURITY.md ROADMAP.md
+recursive-include docs *.md
+recursive-include examples *.csv *.json
