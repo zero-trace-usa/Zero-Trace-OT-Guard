@@ -1,12 +1,12 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 [project]
 name = "zero-trace-ot-guard"
-version = "1.0.0rc2"
+version = "1.0.0rc3"
 description = "Passive-first OT network evidence analysis with approval-gated TCP connectivity checks"
 requires-python = ">=3.10"
-license = {text = "MIT"}
+license = "MIT"
 authors = [{name = "Zero-Trace"}]
 dependencies = []
 [project.optional-dependencies]

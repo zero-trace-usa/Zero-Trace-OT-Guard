@@ -76,5 +76,6 @@ def test_stop_file_prevents_network(tmp_path,monkeypatch):
     stop=tmp_path/'STOP'
     stop.touch()
     monkeypatch.setattr(socket,'create_connection',lambda *a,**k: (_ for _ in ()).throw(AssertionError('network attempted')))
-    result=connect_checks(p,['192.0.2.10'],[443],True,True,stop_file=stop,audit_file=tmp_path/'audit.jsonl')
+    plan=connect_checks(p,['192.0.2.10'],[443],True)
+    result=connect_checks(p,['192.0.2.10'],[443],True,True,stop_file=stop,audit_file=tmp_path/'audit.jsonl',plan_id=plan['plan_id'])
     assert result['mode']=='interrupted' and not result['checks']

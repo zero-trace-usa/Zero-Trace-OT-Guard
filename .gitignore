@@ -10,3 +10,5 @@ active-results.json
 approval.json
 *.pcap
 *.pcapng
+
+active-audit.jsonl

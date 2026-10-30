@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.11', '3.12', '3.13']
+        python-version: ['3.10', '3.11', '3.12', '3.13']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -19,3 +19,39 @@ jobs:
       - run: python -m pytest -q
       - run: python -m compileall -q src
       - run: python -m bandit -q -r src -s B101
+      - run: python -m build
+      - run: python -m otguard analyze --input examples/sample --output reports
+      - name: Verify installed wheel
+        run: |
+          python -m venv /tmp/otguard-wheel
+          /tmp/otguard-wheel/bin/python -m pip install --no-deps dist/*.whl
+          /tmp/otguard-wheel/bin/otguard analyze --input examples/sample --output /tmp/otguard-report
+          /tmp/otguard-wheel/bin/python -c "import json; from pathlib import Path; assert json.loads(Path('/tmp/otguard-report/report.json').read_text())['summary'] == {'observed_assets': 3, 'flows': 2, 'findings': 2}"
+      - name: Retain tested release distributions
+        if: matrix.python-version == '3.12'
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-dist
+          path: dist/*
+          if-no-files-found: error
+  release:
+    if: github.ref == 'refs/tags/v1.0.0-rc.3'
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-dist
+          path: dist
+      - name: Publish tested engineering prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          cd dist
+          sha256sum *.whl *.tar.gz > SHA256SUMS
+          cd ..
+          gh release create "$RELEASE_TAG" dist/*.whl dist/*.tar.gz dist/SHA256SUMS --verify-tag --prerelease --title "Zero-Trace OT Guard $RELEASE_TAG" --notes-file "docs/releases/$RELEASE_TAG.md"

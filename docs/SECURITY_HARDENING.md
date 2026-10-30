@@ -1,4 +1,4 @@
-# v1.0.0-rc.2 security hardening
+# v1.0.0-rc.3 security hardening
 
 ## Approval integrity
 Active checks now require an HMAC-SHA256 signature on the JSON approval file, using a separately provisioned `OTGUARD_APPROVAL_KEY` of at least 32 characters. The approver should hold the signing key separately from the operator. **This is shared-secret integrity, not independent identity verification or PKI-based authorization.** A compromised signing key can authorize arbitrary approvals. Do not commit approval secrets or live approval files.
@@ -14,7 +14,7 @@ Active checks now require an HMAC-SHA256 signature on the JSON approval file, us
 1. Provision the verification key securely. Confirm the signed approval is within scope.
 2. Run a dry-run before any execution:
    `python -m otguard active-check --approval approval.json --target 192.0.2.10 --port 443 --ack-authorized`
-3. Only with additional operational approval, run `--execute --stop-file STOP --audit-file active-audit.jsonl`.
+3. Only with additional operational approval, run `--execute --plan-id <reviewed-plan-id> --stop-file STOP --audit-file active-audit.jsonl`.
 4. To request stop, create the file `STOP` in the operator working directory. Remove stale STOP files before execution. Ctrl+C also interrupts the process. Stop is cooperative; an in-progress socket call may take up to one second to return.
 
 ## Scope and limitations
@@ -28,3 +28,5 @@ Active checks now require an HMAC-SHA256 signature on the JSON approval file, us
 
 ## Production release gates
 Hardware-in-the-loop safety testing, independent security assessment, threat modeling, protocol parser fuzzing, deployment runbooks, operator training, and acceptance by the OT asset owner are **not complete**. Do not call this release production-certified.
+
+See [Safety policy and operator runbook](SAFETY_ENGINE.md) for connection budgeting and audit behavior.

@@ -16,6 +16,7 @@ def main(argv=None):
     b.add_argument('--port',type=int,action='append',required=True)
     b.add_argument('--ack-authorized',action='store_true');b.add_argument('--execute',action='store_true')
     b.add_argument('--output',default='active-results.json')
+    b.add_argument('--plan-id', help='SHA-256 plan identifier from the reviewed dry-run; required with --execute')
     b.add_argument('--stop-file',help='Stop checks when this file exists; remove stale file before execution')
     b.add_argument('--audit-file',default='active-audit.jsonl')
     c=sub.add_parser('sign-approval',help='Sign an approval file using OTGUARD_APPROVAL_KEY; run only by authorized approver')
@@ -36,9 +37,11 @@ def main(argv=None):
             write_report(result,args.output)
             print(json.dumps({'output':args.output,'summary':result['summary']},indent=2))
         else:
-            result=connect_checks(args.approval,args.target,args.port,args.ack_authorized,args.execute,args.stop_file,args.audit_file)
+            result=connect_checks(args.approval,args.target,args.port,args.ack_authorized,args.execute,args.stop_file,args.audit_file,args.plan_id)
             Path(args.output).write_text(json.dumps(result,indent=2),encoding='utf-8')
             print(json.dumps(result,indent=2))
+            if result['mode'] == 'interrupted':
+                return 3
         return 0
     except (ValueError,PermissionError,OSError,AssertionError) as exc:
         p.exit(2,'Error: '+str(exc)+'\n')
