@@ -1,4 +1,4 @@
-# v1.0.0-rc.4 security hardening
+# v1.0.0-rc.5 security hardening
 
 Commands assume an activated virtual environment; see the [installation guide](../README.md). Offline analysis needs no signing key.
 

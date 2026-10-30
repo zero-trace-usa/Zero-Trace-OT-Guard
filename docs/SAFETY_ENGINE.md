@@ -1,6 +1,6 @@
 # Safety policy and operator runbook
 
-Version 1.0.0-rc.4 is an engineering release candidate for offline analysis and controlled lab evaluation. It is not production OT safety certification. The engine does not discover a safe rate for an unknown device. Even one handshake may disrupt fragile equipment.
+Version 1.0.0-rc.5 is an engineering release candidate for offline analysis and controlled lab evaluation. It is not production OT safety certification. The engine does not discover a safe rate for an unknown device. Even one handshake may disrupt fragile equipment.
 
 Commands below assume an activated virtual environment. See [installation](../README.md) and [settings reference](CONFIGURATION.md).
 

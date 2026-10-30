@@ -1,5 +1,7 @@
 """Offline evidence analysis. No network operations in this module."""
 import csv
+import base64
+from importlib.resources import files
 import os
 import ipaddress
 import json
@@ -133,6 +135,17 @@ def write_report(result,out):
         keys=list(dict.fromkeys(k for x in items for k in x))
         return '<table><thead><tr>'+''.join('<th>'+escape(k)+'</th>' for k in keys)+'</tr></thead><tbody>'+''.join('<tr>'+''.join('<td>'+escape(str(x.get(k,'')))+'</td>' for k in keys)+'</tr>' for x in items)+'</tbody></table>'
     html="""<!doctype html><html lang="en"><meta charset="utf-8"><title>Zero-Trace OT Guard Report</title><style>body{font:15px system-ui;max-width:1150px;margin:3rem auto;color:#182633;padding:0 1rem}h1{color:#125b65}table{border-collapse:collapse;width:100%;font-size:13px;margin:1rem 0}th,td{padding:8px;border:1px solid #ccd6db;text-align:left;overflow-wrap:anywhere}th{background:#edf3f5}p{line-height:1.6}</style><h1>Zero-Trace OT Guard</h1><p>Evidence-based offline assessment • Not a certification or proof of vulnerability</p>"""
+    # Embed packaged assets so reports stay standalone and never load remote resources.
+    def image_uri(name):
+        data = files('otguard').joinpath('assets', name).read_bytes()
+        return 'data:image/png;base64,' + base64.b64encode(data).decode('ascii')
+    logo = image_uri('zero-trace-logo.png')
+    avatar = image_uri('zero-trace-avatar.png')
+    html = html.replace('<title>', f'<link rel="icon" type="image/png" href="{avatar}"><title>', 1)
+    html = html.replace('<h1>Zero-Trace OT Guard</h1>',
+                        f'<img src="{logo}" alt="Zero-Trace OT Guard" width="640" '
+                        'style="display:block;max-width:100%;height:auto;background:white;border-radius:8px">'
+                        '<h1>Zero-Trace OT Guard</h1>', 1)
     for heading,content in [('Summary',[result['summary']]),('Findings',result['findings']),('Assets',result['assets']),('Flows',result['flows'])]:html+='<h2>'+heading+'</h2>'+table(content)
     html+='<h2>Limitations</h2><ul>'+''.join('<li>'+escape(x)+'</li>' for x in result['limitations'])+'</ul></html>'
     (out/'report.html').write_text(html,encoding='utf-8')

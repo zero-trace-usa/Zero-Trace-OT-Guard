@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-rc.5 — Zero-Trace branding
+- Added the approved Zero-Trace OT Guard wordmark, transparent logo and square profile avatar.
+- Branded the README, release notes and standalone HTML reports with packaged assets.
+- Embedded report logos and favicon locally, with no external image requests.
+- Added brand asset guidance and installed-package coverage.
+
 ## 1.0.0-rc.4 — Installation and documentation consistency
 - Standardized product, distribution, command and version naming.
 - Added CLI --version and option/default help, plus a complete commands/settings reference.

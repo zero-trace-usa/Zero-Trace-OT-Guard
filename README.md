@@ -1,8 +1,10 @@
 # Zero-Trace OT Guard
 
+<p align="center"><img src="src/otguard/assets/zero-trace-logo.png" alt="Zero-Trace OT Guard logo" width="720"></p>
+
 Passive-first OT network evidence analysis with separately authorized TCP connectivity checks.
 
-**Current release: [v1.0.0-rc.4](https://github.com/zero-trace-usa/Zero-Trace-OT-Guard/releases/tag/v1.0.0-rc.4), an engineering prerelease.** Suitable for offline analysis and controlled lab evaluation. Production OT safety certification and vendor compatibility validation have not been completed.
+**Current release: [v1.0.0-rc.5](https://github.com/zero-trace-usa/Zero-Trace-OT-Guard/releases/tag/v1.0.0-rc.5), an engineering prerelease.** Suitable for offline analysis and controlled lab evaluation. Production OT safety certification and vendor compatibility validation have not been completed.
 
 ## Install and run
 
@@ -11,7 +13,7 @@ Requires Git and Python 3.10 or newer. CI covers Python 3.10–3.13 on Linux. Wi
 ### Linux and macOS
 
 ```sh
-git clone --branch v1.0.0-rc.4 --depth 1 https://github.com/zero-trace-usa/Zero-Trace-OT-Guard.git
+git clone --branch v1.0.0-rc.5 --depth 1 https://github.com/zero-trace-usa/Zero-Trace-OT-Guard.git
 cd Zero-Trace-OT-Guard
 python3 -m venv .venv
 .venv/bin/python -m pip install .
@@ -22,7 +24,7 @@ python3 -m venv .venv
 ### Windows PowerShell
 
 ```powershell
-git clone --branch v1.0.0-rc.4 --depth 1 https://github.com/zero-trace-usa/Zero-Trace-OT-Guard.git
+git clone --branch v1.0.0-rc.5 --depth 1 https://github.com/zero-trace-usa/Zero-Trace-OT-Guard.git
 cd Zero-Trace-OT-Guard
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install .
@@ -31,7 +33,7 @@ python -m venv .venv
 Start-Process .\reports\report.html
 ```
 
-Expected version: `Zero-Trace OT Guard 1.0.0rc4`. Expected sample summary: **3 observed assets, 2 flows, 2 findings**. Open `reports/report.html` locally. JSON and three CSV reports are saved alongside it. Findings are review indicators, not confirmed vulnerabilities.
+Expected version: `Zero-Trace OT Guard 1.0.0rc5`. Expected sample summary: **3 observed assets, 2 flows, 2 findings**. Open `reports/report.html` locally. JSON and three CSV reports are saved alongside it. Findings are review indicators, not confirmed vulnerabilities.
 
 If Git is unavailable, download and extract the release's GitHub source ZIP, open a terminal in its extracted root, then follow the commands starting with virtual-environment creation. The source distribution also includes documentation and examples. A wheel-only install provides the CLI; sample data must be obtained from a source archive separately. Release assets include SHA256SUMS for download integrity checks.
 
@@ -42,7 +44,7 @@ If Git is unavailable, download and extract the release's GitHub source ZIP, ope
 | Zero-Trace OT Guard | Product name |
 | `zero-trace-ot-guard` | Python distribution name; not currently published to PyPI |
 | `otguard` | Installed command and Python module |
-| `v1.0.0-rc.4` / `1.0.0rc4` | GitHub tag / equivalent Python package version |
+| `v1.0.0-rc.5` / `1.0.0rc5` | GitHub tag / equivalent Python package version |
 
 Do not use `pip install zero-trace-ot-guard` as the installation method: this project is distributed through its GitHub release assets and source repository.
 
@@ -96,3 +98,7 @@ python -m build
 ```
 
 Release publication is gated on the multi-version CI test matrix and installed-wheel smoke checks. See [contributing](CONTRIBUTING.md) and the [release checklist](docs/SAFETY_ENGINE.md).
+
+## Brand assets
+
+The [brand guide](docs/BRANDING.md) includes the wordmark, transparent logo and square profile avatar. Offline HTML reports embed the logo and favicon directly; they do not load external images.

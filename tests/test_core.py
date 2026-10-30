@@ -79,3 +79,16 @@ def test_stop_file_prevents_network(tmp_path,monkeypatch):
     plan=connect_checks(p,['192.0.2.10'],[443],True)
     result=connect_checks(p,['192.0.2.10'],[443],True,True,stop_file=stop,audit_file=tmp_path/'audit.jsonl',plan_id=plan['plan_id'])
     assert result['mode']=='interrupted' and not result['checks']
+
+
+def test_report_contains_standalone_brand_assets(tmp_path):
+    import base64
+    import re
+    write_report(assess([]), tmp_path)
+    html = (tmp_path / 'report.html').read_text()
+    images = re.findall(r'data:image/png;base64,([A-Za-z0-9+/=]+)', html)
+    assert len(images) == 2
+    assert all(base64.b64decode(value, validate=True).startswith(b'\x89PNG\r\n\x1a\n') for value in images)
+    assert 'alt="Zero-Trace OT Guard"' in html
+    assert '<link rel="icon"' in html
+    assert '<img src="http' not in html

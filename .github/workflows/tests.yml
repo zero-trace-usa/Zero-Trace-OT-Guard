@@ -29,7 +29,7 @@ jobs:
           python -m venv /tmp/otguard-wheel
           /tmp/otguard-wheel/bin/python -m pip install --no-deps dist/*.whl
           /tmp/otguard-wheel/bin/otguard analyze --input examples/sample --output /tmp/otguard-report
-          /tmp/otguard-wheel/bin/python -c "import json; from pathlib import Path; assert json.loads(Path('/tmp/otguard-report/report.json').read_text())['summary'] == {'observed_assets': 3, 'flows': 2, 'findings': 2}"
+          /tmp/otguard-wheel/bin/python -c "import json; from pathlib import Path; assert json.loads(Path('/tmp/otguard-report/report.json').read_text())['summary'] == {'observed_assets': 3, 'flows': 2, 'findings': 2}; assert 'data:image/png;base64,' in Path('/tmp/otguard-report/report.html').read_text()"
       - name: Retain tested release distributions
         if: matrix.python-version == '3.12'
         uses: actions/upload-artifact@v5
@@ -38,7 +38,7 @@ jobs:
           path: dist/*
           if-no-files-found: error
   release:
-    if: github.ref == 'refs/tags/v1.0.0-rc.4'
+    if: github.ref == 'refs/tags/v1.0.0-rc.5'
     needs: test
     runs-on: ubuntu-latest
     permissions:
@@ -54,7 +54,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
+          cp src/otguard/assets/*.png dist/
           cd dist
-          sha256sum *.whl *.tar.gz > SHA256SUMS
+          sha256sum *.whl *.tar.gz *.png > SHA256SUMS
           cd ..
-          gh release create "$RELEASE_TAG" dist/*.whl dist/*.tar.gz dist/SHA256SUMS --verify-tag --prerelease --title "Zero-Trace OT Guard $RELEASE_TAG" --notes-file "docs/releases/$RELEASE_TAG.md"
+          gh release create "$RELEASE_TAG" dist/*.whl dist/*.tar.gz dist/SHA256SUMS dist/*.png --verify-tag --prerelease --title "Zero-Trace OT Guard $RELEASE_TAG" --notes-file "docs/releases/$RELEASE_TAG.md"
