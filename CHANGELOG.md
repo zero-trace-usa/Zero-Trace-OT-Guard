@@ -3,6 +3,7 @@
 ## 1.0.0-rc.6 — Offline Modbus write analysis
 - Added optional TShark dissection of Modbus/TCP write requests with an explicit source and optional destination allowlist.
 - Added frame/PDU evidence, authorized and unexpected write records, CSV/HTML/JSON output and visible coverage limits.
+- Explicitly require MBAP protocol identifier zero, including on TShark versions that decode non-Modbus identifiers as Modbus-shaped commands.
 - Added actual-dissector regression captures and CI TShark installation; existing CSV and metadata-only workflows remain available.
 - Engineering prerelease for offline analysis and controlled lab evaluation; not production safety certification.
 

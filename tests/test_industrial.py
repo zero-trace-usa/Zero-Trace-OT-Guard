@@ -201,3 +201,22 @@ def test_multiple_ip_layers_are_unassessed(tmp_path,monkeypatch):
     pcap=capture(tmp_path/'capture.pcap',[])
     writes,meta=analyze_writes(pcap,policy(tmp_path,[]))
     assert writes==[] and meta['unassessed_context_frames']==1
+
+
+@pytest.mark.parametrize('identifier',['1',None])
+def test_decoded_function_requires_modbus_header_identifier(tmp_path,monkeypatch,identifier):
+    import otguard.industrial as industrial
+    from types import SimpleNamespace
+    header={} if identifier is None else {'mbtcp.prot_id':identifier}
+    packet={'_source':{'layers':{
+        'frame':{'frame.number':'1'},
+        'ip':{'ip.src':'10.0.0.1','ip.dst':'10.0.0.2'},
+        'tcp':{'tcp.srcport':'12345','tcp.dstport':'502'},
+        'mbtcp':header,'modbus':{'modbus.func_code':'6'}}}}
+    def run(command,stdout,stderr,**kwargs):
+        stdout.write(json.dumps([packet]).encode())
+        return SimpleNamespace(returncode=0)
+    monkeypatch.setattr(industrial.subprocess,'run',run)
+    pcap=capture(tmp_path/'capture.pcap',[])
+    writes,meta=analyze_writes(pcap,policy(tmp_path,[]))
+    assert writes==[] and meta['unassessed_protocol_frames']==1

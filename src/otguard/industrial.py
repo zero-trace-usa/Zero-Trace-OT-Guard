@@ -88,6 +88,7 @@ def analyze_writes(path, policy_path, max_packets=500000, decode_ports=()):
     malformed = 0
     other_requests = 0
     unsupported_context = 0
+    unsupported_protocol = 0
     for packet in packets:
         layers = packet['_source']['layers']
         if '_ws.malformed' in layers:
@@ -103,6 +104,15 @@ def analyze_writes(path, policy_path, max_packets=500000, decode_ports=()):
         network = layers.get('ip', layers.get('ipv6', {}))
         prefix = 'ip' if 'ip' in layers else 'ipv6'
         source, destination = network.get(prefix+'.src'), network.get(prefix+'.dst')
+        headers = layers.get('mbtcp', [])
+        if isinstance(headers, dict):
+            headers = [headers]
+        # Some dissector versions expose Modbus fields even when MBAP's
+        # protocol identifier is nonzero. Require the actual header identifier.
+        # Mixed/unknown headers leave the whole frame unassessed.
+        if not headers or any(header.get('mbtcp.prot_id') != '0' for header in headers):
+            unsupported_protocol += 1
+            continue
         pdus = layers.get('modbus', [])
         if isinstance(pdus, dict):
             pdus = [pdus]
@@ -131,6 +141,7 @@ def analyze_writes(path, policy_path, max_packets=500000, decode_ports=()):
                            'operation': WRITES[code], 'authorized': allowed})
     return writes, {'engine': 'TShark', 'evaluated_allowlist': rules,
                     'unassessed_context_frames': unsupported_context,
+                    'unassessed_protocol_frames': unsupported_protocol,
                     'other_or_unassessed_requests': other_requests, 'decoded_modbus_pdus': decoded,
                     'write_requests': len(writes),
                     'ambiguous_direction_pdus': ambiguous, 'malformed_frames': malformed, 'packet_limit': max_packets,

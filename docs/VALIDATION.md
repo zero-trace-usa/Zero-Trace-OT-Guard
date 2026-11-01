@@ -2,9 +2,9 @@
 
 ## Release verification
 
-The local release validation covers Linux Python 3.10, 3.11, 3.12 and 3.13 with TShark 4.4.18:
+The local release validation covers Linux Python 3.10, 3.11, 3.12 and 3.13 with TShark 4.4.18 (write-analysis regressions also checked with 4.0.17):
 
-- 74 unit, regression and loopback integration tests, including 35 write-analysis tests. Actual TShark captures exercise all seven supported write functions, source/destination authorization, read and reply exclusions, exception replies, nonstandard ports, multiple PDUs, real packet caps, invalid captures and non-Modbus protocol identifiers. Additional checks cover invalid policies, missing TShark, subprocess errors/timeouts, ambiguous direction and unassessed encapsulation contexts.
+- 76 unit, regression and loopback integration tests, including 37 write-analysis tests. Actual TShark captures exercise all seven supported write functions, source/destination authorization, read and reply exclusions, exception replies, nonstandard ports, multiple PDUs, real packet caps, invalid captures and non-Modbus protocol identifiers. Additional checks cover invalid policies, missing TShark, subprocess errors/timeouts, ambiguous direction and unassessed encapsulation contexts.
 - Source compilation and Bandit (B101 excluded, matching CI).
 - Source distribution and wheel builds; source archive examples and documentation.
 - Clean installed-wheel CLI version and offline sample: 3 assets, 2 flows and 2 findings, with standalone embedded branding.

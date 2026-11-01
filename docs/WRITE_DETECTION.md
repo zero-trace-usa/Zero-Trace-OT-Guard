@@ -4,7 +4,7 @@ This optional analysis uses the installed TShark command to decode captured Modb
 
 ## Run
 
-Install TShark using your operating system's supported package manager (for example, `sudo apt-get install tshark` on Debian/Ubuntu). Live-capture privileges are unnecessary. TShark must be on PATH. Integration tests were validated with TShark 4.4.18 on Linux; keep the dissector updated when processing untrusted captures.
+Install TShark using your operating system's supported package manager (for example, `sudo apt-get install tshark` on Debian/Ubuntu). Live-capture privileges are unnecessary. TShark must be on PATH. Integration tests were validated with TShark 4.4.18 and 4.0.17 on Linux; keep the dissector updated when processing untrusted captures.
 
 Create an input directory containing `capture.pcap`, without `flows.csv`. The current CLI still requires classic Ethernet/IPv4 PCAP for its flow reader; this feature does not add PCAPNG or IPv6 capture support. Copy and review `examples/write-policy.example.json`, replacing documentation addresses with the approved endpoints:
 
@@ -12,7 +12,7 @@ Create an input directory containing `capture.pcap`, without `flows.csv`. The cu
 python -m otguard analyze --input evidence --output reports --write-policy write-policy.json
 ```
 
-For Modbus on a known nonstandard server port, explicitly add `--modbus-tcp-port 1502`. Repeat the option for additional ports. This configures TShark's Modbus TCP dissector and request direction; it is an operator-supplied decoding assumption, not independent protocol confirmation. Port 502 remains enabled. A port number alone never creates a write finding: decoded Modbus function fields must also be present. Existing flow service labels remain port-based indicators.
+For Modbus on a known nonstandard server port, explicitly add `--modbus-tcp-port 1502`. Repeat the option for additional ports. This configures TShark's Modbus TCP dissector and request direction; it is an operator-supplied decoding assumption, not independent protocol confirmation. Port 502 remains enabled. A port number alone never creates a write finding: decoded Modbus function fields and MBAP protocol identifier zero must also be present. Some TShark versions expose function fields for nonzero identifiers; these frames are explicitly left unassessed. Existing flow service labels remain port-based indicators.
 
 ## Authorization rules
 
@@ -40,7 +40,7 @@ Each decoded request is recorded in `write_operations` in report.json, the HTML 
 
 TShark determines protocol/function fields. Request direction requires the destination to use a configured server port and the source to use a different, non-server port. Replies (including orphan replies), exceptions and ambiguous directions are excluded. Wireshark itself uses configured server ports to distinguish Modbus TCP request/reply direction. A captured request is evidence of an attempted operation; it does not prove the destination accepted or performed it.
 
-`write_analysis` records evaluated rules, decoded Modbus PDU and write counts, ambiguous directions, malformed frames, unassessed encapsulation contexts, other/unassessed requests, packet cap, explicit decode ports and dissector diagnostics. These fields also appear in HTML. Malformed frame counting covers packets returned by the Modbus display filter, not the entire capture. Other/unassessed requests are not classified as safe or authorized.
+`write_analysis` records evaluated rules, decoded Modbus PDU and write counts, ambiguous directions, malformed frames, unassessed protocol identifiers, unassessed encapsulation contexts, other/unassessed requests, packet cap, explicit decode ports and dissector diagnostics. These fields also appear in HTML. Malformed frame counting covers packets returned by the Modbus display filter, not the entire capture. Other/unassessed requests are not classified as safe or authorized.
 
 ## Coverage limits
 
