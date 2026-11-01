@@ -14,7 +14,7 @@ The tag-triggered GitHub Actions workflow repeats the supported Python 3.10–3.
 
 ## Published rc.6 verification
 
-The [tagged release workflow](https://github.com/zero-trace-usa/Zero-Trace-OT-Guard/actions/runs/41291483194) passed for release commit `8ffdf58` and published [v1.0.0-rc.6](https://github.com/zero-trace-usa/Zero-Trace-OT-Guard/releases/tag/v1.0.0-rc.6) as an engineering prerelease. The Python 3.10–3.13 test/build matrix and release job completed successfully. Main-branch CodeQL also passed for the release code.
+The [privacy-sanitized verification workflow](https://github.com/zero-trace-usa/Zero-Trace-OT-Guard/actions/runs/41292697852) passed after the owner-authorized metadata cleanup of [v1.0.0-rc.6](https://github.com/zero-trace-usa/Zero-Trace-OT-Guard/releases/tag/v1.0.0-rc.6) ; the release remains an engineering prerelease. The Python 3.10–3.13 test/build matrix and release job completed successfully. Main-branch CodeQL also passed for the release code.
 
 After publication, all five downloadable package/image assets were downloaded and verified against the published SHA256SUMS. Fresh environments installed both the public wheel and public source distribution. Each passed CLI version, offline sample (3 assets, 2 flows, 2 findings) and Modbus write smoke checks (one unexpected write record and finding, excluding its reply). The public wheel also rendered embedded branding successfully.
 
@@ -29,3 +29,9 @@ The flow parser retains supported metadata only. PCAPNG and IPv6 capture decodin
 Active connection limits are per invocation, not aggregate across operators or processes. Audit logging is not tamper-evident. Shared-key approval signing relies on key custody; the stop file is cooperative, not a safety-rated emergency-stop system. A matching plan identifier is not evidence of independent human review. See SAFETY_ENGINE.md and SECURITY_HARDENING.md for operating constraints and production gates.
 
 Brand assets remain embedded in standalone HTML reports and packaged distributions. Account-avatar and repository social-preview uploads are manual GitHub settings operations; no account image change is claimed.
+
+## Privacy metadata cleanup
+
+The owner authorized rewriting affected author/committer and annotated-tag metadata, removing literal personal-identity aliases, and enforcing the established GitHub privacy address. A fresh remote mirror was audited for the removed identity in every transferred commit, tag and file blob; none remained. The five published package/image assets were also checked and contained no removed identity. Application sources, tests, examples and dependency declarations were preserved.
+
+The scoped cleanup removed 14 superseded workflow runs and 12 code-scanning analyses, with no outstanding API operations. The temporary workflow and its elevated cleanup permissions were then removed. The existing release publication step is now safe to repeat for a sanitized tag without replacing already verified package assets. Cached unreachable commit pages remain a GitHub Support matter; see [privacy guidance](PRIVACY.md).
