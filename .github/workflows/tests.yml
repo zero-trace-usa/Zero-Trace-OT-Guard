@@ -86,4 +86,8 @@ jobs:
           cd dist
           sha256sum *.whl *.tar.gz *.png > SHA256SUMS
           cd ..
-          gh release create "$RELEASE_TAG" dist/*.whl dist/*.tar.gz dist/SHA256SUMS dist/*.png --verify-tag --prerelease --title "Zero-Trace OT Guard $RELEASE_TAG" --notes-file "docs/releases/$RELEASE_TAG.md"
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "Published release already exists; verified tag rebuild leaves its assets intact."
+          else
+            gh release create "$RELEASE_TAG" dist/*.whl dist/*.tar.gz dist/SHA256SUMS dist/*.png --verify-tag --prerelease --title "Zero-Trace OT Guard $RELEASE_TAG" --notes-file "docs/releases/$RELEASE_TAG.md"
+          fi

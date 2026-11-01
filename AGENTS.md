@@ -1,7 +1,12 @@
-# Git commit identity
+# Git identity and privacy
 
-Use `Zero-Trace` as the Git author and committer name for this repository. A ChatGPT display-name change does not update Git configuration.
+For every commit in this repository, configure both the author and committer identity:
 
-Before creating a commit, run `git config --local user.name Zero-Trace` and check `git var GIT_AUTHOR_IDENT` and `git var GIT_COMMITTER_IDENT`. Preserve the user's configured email unless they explicitly request an email change. Do not use an inherited `Zero-Trace` author name or invent an email address.
+```sh
+git config --local user.name Zero-Trace
+git config --local user.email 78784941+zero-trace-usa@users.noreply.github.com
+```
 
-The repository's `.mailmap` maps the previous display name for supported history views. Preserve published release tags and existing commit history when correcting future attribution.
+Check `git var GIT_AUTHOR_IDENT` and `git var GIT_COMMITTER_IDENT` before committing. Both must use the name and GitHub privacy email above. Never inherit a personal email address from global or platform Git configuration. A ChatGPT display-name change does not configure Git.
+
+Do not add historical personal-identity aliases to `.mailmap`, documentation or generated files. Preserve the sanitized identity when applying patches or making releases. Changing published history requires explicit user authorization; the repository privacy cleanup was explicitly requested by its owner.
