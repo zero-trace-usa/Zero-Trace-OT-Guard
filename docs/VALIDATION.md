@@ -14,7 +14,7 @@ The tag-triggered GitHub Actions workflow repeats the supported Python 3.10–3.
 
 ## Published rc.6 verification
 
-The [privacy-sanitized verification workflow](https://github.com/zero-trace-usa/Zero-Trace-OT-Guard/actions/runs/41292697852) passed after the owner-authorized metadata cleanup of [v1.0.0-rc.6](https://github.com/zero-trace-usa/Zero-Trace-OT-Guard/releases/tag/v1.0.0-rc.6) ; the release remains an engineering prerelease. The Python 3.10–3.13 test/build matrix and release job completed successfully. Main-branch CodeQL also passed for the release code.
+The [privacy-sanitized verification workflow](https://github.com/zero-trace-usa/Zero-Trace-OT-Guard/actions/runs/41292697852) passed after the owner-authorized metadata cleanup of [v1.0.0-rc.6](https://github.com/zero-trace-usa/Zero-Trace-OT-Guard/releases/tag/v1.0.0-rc.6); the release remains an engineering prerelease. The Python 3.10–3.13 test/build matrix passed. The existing prerelease and its verified package assets were retained. Main-branch CodeQL also passed for the release code.
 
 After publication, all five downloadable package/image assets were downloaded and verified against the published SHA256SUMS. Fresh environments installed both the public wheel and public source distribution. Each passed CLI version, offline sample (3 assets, 2 flows, 2 findings) and Modbus write smoke checks (one unexpected write record and finding, excluding its reply). The public wheel also rendered embedded branding successfully.
 
