@@ -8,7 +8,7 @@ Passive-first OT network evidence analysis with separately authorized TCP connec
 
 ## User guide
 
-Start with the [complete user guide](docs/wiki/Home.md) for installation, evidence preparation, Modbus write-policy examples, report interpretation, troubleshooting and separately authorized active checks. The guide is maintained in the repository and prepared for GitHub Wiki publication.
+Start with the [GitHub Wiki](https://github.com/zero-trace-usa/Zero-Trace-OT-Guard/wiki) for installation, evidence preparation, Modbus write-policy examples, report interpretation, troubleshooting and separately authorized active checks. A reviewable [repository copy](docs/wiki/Home.md) is maintained alongside the code.
 
 ## Install and run
 

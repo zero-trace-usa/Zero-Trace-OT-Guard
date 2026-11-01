@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased — User documentation
+- Published the user guide and sidebar to GitHub Wiki, with a version-controlled repository copy.
 - Added a complete repository-backed Wiki guide covering installation, evidence schemas, Modbus write policy, reports, troubleshooting, active-check prerequisites and data handling.
 - Added a Wiki page-preparation helper, source-archive inclusion and links from project documentation metadata.
 - Corrected the security guide to distinguish metadata-only PCAP analysis from optional TShark command decoding. No analysis runtime behavior changed.
