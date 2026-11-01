@@ -14,6 +14,8 @@ There is no global settings file, network listener, account registration or tele
 | --- | --- | --- |
 | `--input DIRECTORY` | Required | Read flows.csv or capture.pcap; CSV takes precedence |
 | `--output DIRECTORY` | `reports` | Create the directory; overwrite report.html, report.json, assets.csv, flows.csv and findings.csv |
+| `--write-policy FILE` | None | Enable TShark Modbus write analysis using an explicit JSON allowlist; requires capture.pcap without flows.csv |
+| `--modbus-tcp-port INTEGER` | None; repeatable | Additional Modbus server/decode port, 1–65535; requires --write-policy |
 | `--max-packets INTEGER` | `500000` | PCAP processing cap, 1–1000000; unused with CSV |
 
 Optional files in the input directory: assets.csv, advisories.csv and rules.csv. Copy column names from examples/sample. CSV files are capped at 20 MiB and 100,000 rows each; PCAP at 256 MiB. Offline flow CSV accepts literal IPv4 or IPv6 addresses and TCP/UDP flows; the PCAP decoder supports IPv4 only. PCAP limitations are described in the README. Outputs can contain sensitive inventory; store them with appropriate filesystem permissions.
@@ -53,3 +55,5 @@ The stop file is cooperative and cannot cancel already transmitted traffic. Star
 | `3` | Execution interrupted by operator, approval expiry or consecutive-failure cutoff |
 
 An audit or output-write failure can occur after an attempt. A failed command is not evidence that no traffic was sent; reconcile audit intent records before another run. Stop requests and signed approvals are software controls, not safety-rated protection.
+
+See [offline write detection](WRITE_DETECTION.md) for policy schema, additional write_operations.csv output, supported commands and interpretation limits.

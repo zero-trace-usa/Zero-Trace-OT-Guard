@@ -4,7 +4,7 @@
 
 Passive-first OT network evidence analysis with separately authorized TCP connectivity checks.
 
-**Current release: [v1.0.0-rc.5](https://github.com/zero-trace-usa/Zero-Trace-OT-Guard/releases/tag/v1.0.0-rc.5), an engineering prerelease.** Suitable for offline analysis and controlled lab evaluation. Production OT safety certification and vendor compatibility validation have not been completed.
+**Current release: [v1.0.0-rc.6](https://github.com/zero-trace-usa/Zero-Trace-OT-Guard/releases/tag/v1.0.0-rc.6), an engineering prerelease.** Suitable for offline analysis and controlled lab evaluation. Production OT safety certification and vendor compatibility validation have not been completed.
 
 ## Install and run
 
@@ -13,7 +13,7 @@ Requires Git and Python 3.10 or newer. CI covers Python 3.10–3.13 on Linux. Wi
 ### Linux and macOS
 
 ```sh
-git clone --branch v1.0.0-rc.5 --depth 1 https://github.com/zero-trace-usa/Zero-Trace-OT-Guard.git
+git clone --branch v1.0.0-rc.6 --depth 1 https://github.com/zero-trace-usa/Zero-Trace-OT-Guard.git
 cd Zero-Trace-OT-Guard
 python3 -m venv .venv
 .venv/bin/python -m pip install .
@@ -24,7 +24,7 @@ python3 -m venv .venv
 ### Windows PowerShell
 
 ```powershell
-git clone --branch v1.0.0-rc.5 --depth 1 https://github.com/zero-trace-usa/Zero-Trace-OT-Guard.git
+git clone --branch v1.0.0-rc.6 --depth 1 https://github.com/zero-trace-usa/Zero-Trace-OT-Guard.git
 cd Zero-Trace-OT-Guard
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install .
@@ -33,7 +33,7 @@ python -m venv .venv
 Start-Process .\reports\report.html
 ```
 
-Expected version: `Zero-Trace OT Guard 1.0.0rc5`. Expected sample summary: **3 observed assets, 2 flows, 2 findings**. Open `reports/report.html` locally. JSON and three CSV reports are saved alongside it. Findings are review indicators, not confirmed vulnerabilities.
+Expected version: `Zero-Trace OT Guard 1.0.0rc6`. Expected sample summary: **3 observed assets, 2 flows, 2 findings**. Open `reports/report.html` locally. JSON and three CSV reports are saved alongside it. Findings are review indicators, not confirmed vulnerabilities.
 
 If Git is unavailable, download and extract the release's GitHub source ZIP, open a terminal in its extracted root, then follow the commands starting with virtual-environment creation. The source distribution also includes documentation and examples. A wheel-only install provides the CLI; sample data must be obtained from a source archive separately. Release assets include SHA256SUMS for download integrity checks.
 
@@ -44,7 +44,7 @@ If Git is unavailable, download and extract the release's GitHub source ZIP, ope
 | Zero-Trace OT Guard | Product name |
 | `zero-trace-ot-guard` | Python distribution name; not currently published to PyPI |
 | `otguard` | Installed command and Python module |
-| `v1.0.0-rc.5` / `1.0.0rc5` | GitHub tag / equivalent Python package version |
+| `v1.0.0-rc.6` / `1.0.0rc6` | GitHub tag / equivalent Python package version |
 
 Do not use `pip install zero-trace-ot-guard` as the installation method: this project is distributed through its GitHub release assets and source repository.
 
@@ -61,6 +61,16 @@ python -m otguard analyze --help
 Replace `examples/sample` with your evidence directory, quoting paths containing spaces. Supply `flows.csv` or a classic Ethernet/IPv4 `capture.pcap`. CSV takes precedence if both exist. Optional files are `assets.csv`, `advisories.csv` and `rules.csv`; use the sample headers as templates. Reports in the output directory are overwritten on rerun, so choose a new directory when preserving evidence.
 
 PCAP ingestion retains TCP/UDP metadata, not protocol payloads. PCAPNG, IPv6 packet decoding and fragmented IPv4 packets are unsupported. VLAN tags are traversed to locate IPv4; VLAN identities are not retained or used for policy assessment. PCAP byte totals are zero because byte accounting is not implemented. The default processing cap is 500,000 packets; maximum 1,000,000. Inspect JSON evidence warnings for incomplete captures. See [architecture](docs/ARCHITECTURE.md) and [settings](docs/CONFIGURATION.md).
+
+## Optional offline write detection
+
+Use TShark to decode Modbus/TCP write requests and flag sources or destinations outside an explicit allowlist:
+
+```sh
+python -m otguard analyze --input evidence --output reports --write-policy write-policy.json
+```
+
+Requires TShark on PATH and a directory containing `capture.pcap` without `flows.csv`. Start from `examples/write-policy.example.json` and replace its documentation addresses with approved endpoints. This mode identifies decoded write commands, rather than inferring writes from ports. It reports attempted requests, not confirmed device changes. See [write detection](docs/WRITE_DETECTION.md) for supported functions, nonstandard ports, policy rules and coverage limits. Existing flow service labels remain indicative and port-based.
 
 ## Optional authorized connectivity checks
 

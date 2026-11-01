@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-rc.6 — Offline Modbus write analysis
+- Added optional TShark dissection of Modbus/TCP write requests with an explicit source and optional destination allowlist.
+- Added frame/PDU evidence, authorized and unexpected write records, CSV/HTML/JSON output and visible coverage limits.
+- Added actual-dissector regression captures and CI TShark installation; existing CSV and metadata-only workflows remain available.
+- Engineering prerelease for offline analysis and controlled lab evaluation; not production safety certification.
+
 ## 1.0.0-rc.5 — Zero-Trace branding
 - Added the approved Zero-Trace OT Guard wordmark, transparent logo and square profile avatar.
 - Branded the README, release notes and standalone HTML reports with packaged assets.

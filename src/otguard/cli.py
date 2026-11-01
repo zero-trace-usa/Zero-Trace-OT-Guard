@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 from . import __version__
 from .core import rows_csv,parse_pcap,assess,write_report
+from .industrial import analyze_writes, add_write_findings
 from .active import connect_checks, sign_approval
 
 def main(argv=None):
@@ -13,6 +14,8 @@ def main(argv=None):
     a.add_argument('--input',required=True,help='Directory with flows.csv or capture.pcap')
     a.add_argument('--output',default='reports',help='Directory for HTML, JSON and CSV reports')
     a.add_argument('--max-packets',type=int,default=500000,help='PCAP packet processing cap (1–1000000); not used for CSV')
+    a.add_argument('--write-policy', help='JSON Modbus write allowlist; requires TShark and capture.pcap, rejects CSV precedence')
+    a.add_argument('--modbus-tcp-port', type=int, action='append', default=[], help='Explicit TShark Modbus decode-as TCP port; repeatable, requires --write-policy')
     b=sub.add_parser('active-check', formatter_class=argparse.ArgumentDefaultsHelpFormatter, help='Approval-gated TCP-connect only (dry-run by default)')
     b.add_argument('--approval',required=True,help='Path to HMAC-signed approval JSON');b.add_argument('--target',action='append',required=True,help='Exact approved IP address; repeat for multiple targets')
     b.add_argument('--port',type=int,action='append',required=True,help='Approved TCP port; repeat for multiple ports')
@@ -30,11 +33,18 @@ def main(argv=None):
             print('Approval signed')
         elif args.command=='analyze':
             folder=Path(args.input)
+            if args.modbus_tcp_port and not args.write_policy:
+                raise ValueError('--modbus-tcp-port requires --write-policy')
+            if args.write_policy and ((folder/'flows.csv').exists() or not (folder/'capture.pcap').exists()):
+                raise ValueError('--write-policy requires capture.pcap without flows.csv in the input directory')
             if (folder/'flows.csv').exists():flows=rows_csv(folder/'flows.csv');meta={'source':'CSV'}
             elif (folder/'capture.pcap').exists():flows,meta=parse_pcap(folder/'capture.pcap',args.max_packets)
             else:raise ValueError('Expected flows.csv or capture.pcap in input directory')
             get=lambda name:rows_csv(folder/name) if (folder/name).exists() else []
             result=assess(flows,get('assets.csv'),get('advisories.csv'),get('rules.csv'))
+            if args.write_policy:
+                writes, coverage = analyze_writes(folder/'capture.pcap', args.write_policy, args.max_packets, args.modbus_tcp_port)
+                add_write_findings(result, writes, coverage)
             result['evidence_metadata']=meta
             write_report(result,args.output)
             print(json.dumps({'output':args.output,'summary':result['summary']},indent=2))

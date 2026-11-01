@@ -1,7 +1,8 @@
 # Roadmap
 
 - [ ] PCAPNG, IPv6 packet decoding, VLAN identity retention and further parser hardening.
-- [ ] Validated passive protocol decoders with safe handling of malformed frames.
+- [x] Optional TShark-backed Modbus/TCP write detection with source/destination allowlists and offline regression captures.
+- [ ] Expand industrial command coverage and malformed-capture testing across protocols.
 - [x] HMAC-signed approval artifacts and reviewed plan identifiers.
 - [ ] Independent authorization service and single-use approvals.
 - [x] Structured per-run JSONL audit trails and connection timing evidence.

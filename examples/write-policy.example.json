@@ -1,0 +1,8 @@
+{
+  "modbus_write_allowlist": [
+    {
+      "source": "192.0.2.10",
+      "destinations": ["192.0.2.20"]
+    }
+  ]
+}

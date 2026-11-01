@@ -130,6 +130,12 @@ def write_report(result,out):
         with (out/(name+'.csv')).open('w',newline='',encoding='utf-8') as f:
             keys=list(dict.fromkeys(k for item in items for k in item))
             w=csv.DictWriter(f,fieldnames=keys); w.writeheader(); w.writerows([{k:csv_safe(v) for k,v in item.items()} for item in items])
+    if 'write_operations' in result:
+        with (out/'write_operations.csv').open('w', newline='', encoding='utf-8') as f:
+            keys = ['frame', 'pdu', 'source', 'destination', 'protocol', 'function_code', 'operation', 'authorized']
+            writer = csv.DictWriter(f, fieldnames=keys)
+            writer.writeheader()
+            writer.writerows([{k: csv_safe(v) for k, v in item.items()} for item in result['write_operations']])
     def table(items):
         if not items:return '<p>No entries.</p>'
         keys=list(dict.fromkeys(k for x in items for k in x))
@@ -147,5 +153,8 @@ def write_report(result,out):
                         'style="display:block;max-width:100%;height:auto;background:white;border-radius:8px">'
                         '<h1>Zero-Trace OT Guard</h1>', 1)
     for heading,content in [('Summary',[result['summary']]),('Findings',result['findings']),('Assets',result['assets']),('Flows',result['flows'])]:html+='<h2>'+heading+'</h2>'+table(content)
+    if 'write_operations' in result:
+        html += '<h2>Modbus write requests</h2>' + table(result['write_operations'])
+        html += '<h2>Write analysis coverage</h2>' + table([result['write_analysis']])
     html+='<h2>Limitations</h2><ul>'+''.join('<li>'+escape(x)+'</li>' for x in result['limitations'])+'</ul></html>'
     (out/'report.html').write_text(html,encoding='utf-8')
