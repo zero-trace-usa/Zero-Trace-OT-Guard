@@ -6,6 +6,10 @@ Passive-first OT network evidence analysis with separately authorized TCP connec
 
 **Current release: [v1.0.0-rc.6](https://github.com/zero-trace-usa/Zero-Trace-OT-Guard/releases/tag/v1.0.0-rc.6), an engineering prerelease.** Suitable for offline analysis and controlled lab evaluation. Production OT safety certification and vendor compatibility validation have not been completed.
 
+## User guide
+
+Start with the [complete user guide](docs/wiki/Home.md) for installation, evidence preparation, Modbus write-policy examples, report interpretation, troubleshooting and separately authorized active checks. The guide is maintained in the repository and prepared for GitHub Wiki publication.
+
 ## Install and run
 
 Requires Git and Python 3.10 or newer. CI covers Python 3.10–3.13 on Linux. Windows and macOS commands are provided, but those operating systems have not been validated in CI. No runtime dependencies, API keys, background services or device access are required for offline analysis. Internet access is needed to clone and fetch Python build tools during installation.

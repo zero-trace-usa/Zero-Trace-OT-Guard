@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased — User documentation
+- Added a complete repository-backed Wiki guide covering installation, evidence schemas, Modbus write policy, reports, troubleshooting, active-check prerequisites and data handling.
+- Added a Wiki page-preparation helper, source-archive inclusion and links from project documentation metadata.
+- Corrected the security guide to distinguish metadata-only PCAP analysis from optional TShark command decoding. No analysis runtime behavior changed.
+
 ## 1.0.0-rc.6 — Offline Modbus write analysis
 - Added optional TShark dissection of Modbus/TCP write requests with an explicit source and optional destination allowlist.
 - Added frame/PDU evidence, authorized and unexpected write records, CSV/HTML/JSON output and visible coverage limits.

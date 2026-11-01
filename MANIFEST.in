@@ -2,3 +2,4 @@ include CHANGELOG.md CONTRIBUTING.md SECURITY.md ROADMAP.md
 recursive-include docs *.md
 recursive-include examples *.csv *.json
 recursive-include tests *.py
+include scripts/prepare_wiki.py

@@ -17,14 +17,14 @@ Active checks now require an HMAC-SHA256 signature on the JSON approval file, us
 2. Run a dry-run before any execution:
    `python -m otguard active-check --approval approval.json --target 192.0.2.10 --port 443 --ack-authorized`
 3. Only with additional operational approval, run `--execute --plan-id <reviewed-plan-id> --stop-file STOP --audit-file active-audit.jsonl`.
-4. To request stop, create the file `STOP` in the operator working directory. Remove stale STOP files before execution. Ctrl+C also interrupts the process. Stop is cooperative; an in-progress socket call may take up to one second to return.
+4. To request stop, create the file `STOP` in the operator working directory. Investigate existing STOP requests and resolve them through the approved procedure before any execution. Ctrl+C also interrupts the process. Stop is cooperative; an in-progress socket call may take up to one second to return.
 
 ## Scope and limitations
 - TCP connect only; no industrial protocol commands, firmware reads, or exploitation.
 - Default is dry-run. Acknowledgement, valid signed approval, explicit `--execute`, and exact IP/port scope are required.
 - Denied OT ports remain blocked. A connect to an allowed port is still active network traffic and may affect fragile equipment.
 - Audit log is append-only at application level, **not tamper-evident**. Protect it using external centralized logging and access controls.
-- PCAP is limited to classic Ethernet IPv4 TCP/UDP metadata. IPv6, PCAPNG and protocol payload decoding are unsupported. Malformed records may be skipped; inspect warnings and incomplete-capture indicators.
+- The CLI flow reader requires classic Ethernet/IPv4 PCAP; IPv6 capture decoding and PCAPNG remain unsupported. Basic analysis retains flow metadata. Optional TShark-backed analysis decodes the documented Modbus/TCP write functions using an explicit source/destination allowlist; see [write detection](WRITE_DETECTION.md). Other protocol commands and incomplete or undecoded traffic are not assessed. Inspect warnings and coverage counters.
 - Advisory matching is exact inventory-field correlation, **not** a verified affected-version range engine. Treat findings as potential matches.
 - CSV inputs are limited to 20 MiB/100,000 rows; PCAP to 256 MiB and at most 1,000,000 processed packets.
 
